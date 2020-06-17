@@ -1,6 +1,23 @@
 import sys
 import csv
 
+class Length:
+	def __init__(self):
+		self.count = [0]*100
+		self.accepted = [0]*100
+		log_name = sys.argv[2] + '_log.csv'
+		self.log_file = open(log_name, 'w')
+
+	def write(self):
+		self.log_file.write('read length;total;accepted')
+		output_text = ''
+		for index in range(len(self.count)):
+			output_text += '\n' + str(index) + ';' + str(self.count[index]) + ';' + str(self.accepted[index])
+			if self.count[index] != 0 or self.accepted[index] != 0:
+				self.log_file.write(output_text)
+				output_text = ''
+
+
 def read_input(input_name, output_name, ref_name, dict_name):
 	dict_file = open(dict_name, 'r')
 	pos_dict = dict(csv.reader(dict_file, delimiter=';'))
@@ -13,12 +30,14 @@ def read_input(input_name, output_name, ref_name, dict_name):
 		if reference_code != '':
 			if reference_code[0] == '>':
 				if reference_code[0] != None:
-					final_dict[gene_id] = [0]*gene_len
+					final_dict[gene_id] = [0]*int(gene_len/3)
 				gene_id = str.split(reference_code, ' ')[0].replace('>', '')
 				gene_len = 0
 			else:
 				gene_len += len(reference_code)
 	final_dict[gene_id] = [0]*gene_len
+
+	length = Length()
 
 	for input_entry in open(input_name, 'r'):
 		input_list = str.split(input_entry, '\t')
@@ -27,12 +46,14 @@ def read_input(input_name, output_name, ref_name, dict_name):
 		if not (seq_id in final_dict):
 			continue
 
-		Asite_pos = get_codon_pos(input_list[9], int(input_list[3]), pos_dict)
+		Asite_pos = get_codon_pos(input_list[9], int(input_list[3]), pos_dict, length)
 
 		if Asite_pos != None:
 			final_dict[seq_id][Asite_pos] += 1
 
+	length.write()
 	output_file = open(output_name, 'w')
+
 	for entry in final_dict:
 		try:
 			output_file.write(entry)
@@ -42,9 +63,13 @@ def read_input(input_name, output_name, ref_name, dict_name):
 		except:
 			pass
 
-def get_codon_pos(sequence, position, pos_dict):
-	seq_len = str(len(sequence))
+def get_codon_pos(sequence, position, pos_dict, length):
+	seq_len_int = len(sequence)
+	length.count[seq_len_int] += 1
+
+	seq_len = str(seq_len_int)
 	if seq_len in pos_dict:
+		length.accepted[seq_len_int] += 1
 		if (position+int(pos_dict[seq_len]))%3==0 or pos_dict['miss']=='down' or (pos_dict['miss']=='round' and (position+int(pos_dict[seq_len]))%3==1):
 			Asite_pos = int((position + int(pos_dict[seq_len]))/3)
 			return Asite_pos
