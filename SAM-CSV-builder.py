@@ -70,14 +70,12 @@ def get_codon_pos(sequence, position, pos_dict, length):
 	seq_len = str(seq_len_int)
 	if seq_len in pos_dict:
 		length.accepted[seq_len_int] += 1
-		if (position+int(pos_dict[seq_len]))%3==0 or pos_dict['miss']=='down' or (pos_dict['miss']=='round' and (position+int(pos_dict[seq_len]))%3==1):
+		if (position+int(pos_dict[seq_len]))%3==0 or (position+int(pos_dict[seq_len]))%3==1:
 			Asite_pos = int((position + int(pos_dict[seq_len]))/3)
 			return Asite_pos
-		elif pos_dict['miss']=='round' and (position+int(pos_dict[seq_len]))%3==2:
+		elif (position+int(pos_dict[seq_len]))%3==2:
 			Asite_pos = int((position + int(pos_dict[seq_len]))/3)+1
-			return Asite_pos		
-		else:
-			return None
+			return Asite_pos
 	else:
 		return None
 
